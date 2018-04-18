@@ -47,14 +47,23 @@ type resulter struct {
 }
 
 func (r *resulter) Len() int {
+	r.Lock()
+	defer r.Unlock()
+
 	return len(r.result)
 }
 
 func (r *resulter) Less(i, j int) bool {
+	r.Lock()
+	defer r.Unlock()
+
 	return sortorder.NaturalLess(r.s[i], r.s[j])
 }
 
 func (r *resulter) Swap(i, j int) {
+	r.Lock()
+	defer r.Unlock()
+
 	r.s[i], r.s[j] = r.s[j], r.s[i]
 }
 
@@ -97,6 +106,9 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 }
 
 func (r resulter) writeFile() {
+	r.Lock()
+	defer r.Unlock()
+
 	var buffer bytes.Buffer
 	for _, v := range sortedKeys(r.result) {
 		logrus.WithField("value", v).Debug("writing line to file")
