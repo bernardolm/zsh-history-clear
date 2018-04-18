@@ -5,12 +5,13 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"sort"
 
 	logrus "github.com/sirupsen/logrus"
 )
 
 // TODO: With less limit, don't match repetead
-const limit int = 250
+const limit int = 250000
 
 var file = os.Getenv("HOME") + "/.zsh_history"
 
@@ -40,6 +41,32 @@ type resulter struct {
 	sync.Mutex
 
 	result map[string]string
+	s      []string
+}
+
+func (r *resulter) Len() int {
+	return len(r.result)
+}
+
+func (r *resulter) Less(i, j int) bool {
+	return r.s[i] < r.s[j]
+}
+
+func (r *resulter) Swap(i, j int) {
+	r.s[i], r.s[j] = r.s[j], r.s[i]
+}
+
+func sortedKeys(m map[string]string) []string {
+	sm := new(resulter)
+	sm.result = m
+	sm.s = make([]string, len(m))
+	i := 0
+	for key := range m {
+		sm.s[i] = key
+		i++
+	}
+	sort.Sort(sm)
+	return sm.s
 }
 
 func (r *resulter) addData(lines *[]string, mycounter *counter) {
@@ -69,7 +96,7 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 
 func (r resulter) writeFile() {
 	var buffer bytes.Buffer
-	for _, v := range r.result {
+	for _, v := range sortedKeys(r.result) {
 		logrus.WithField("value", v).Debug("writing line to file")
 		buffer.WriteString(v)
 		buffer.WriteString("\n")
