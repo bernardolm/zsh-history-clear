@@ -56,35 +56,21 @@ func (r *Resulter) addData(lines []string) {
 			logrus.WithField("entry", v).WithField("value", value).Debug("ignoring repeated")
 		}
 	}
-
-	r.counter.Reset()
 }
 
 func (r *Resulter) Len() int {
-	r.Lock()
-	defer r.Unlock()
-
 	return len(r.result)
 }
 
 func (r *Resulter) Less(i, j int) bool {
-	r.Lock()
-	defer r.Unlock()
-
 	return sortorder.NaturalLess(r.s[i], r.s[j])
 }
 
 func (r *Resulter) Swap(i, j int) {
-	r.Lock()
-	defer r.Unlock()
-
 	r.s[i], r.s[j] = r.s[j], r.s[i]
 }
 
 func (r *Resulter) sortedKeys() []string {
-	r.Lock()
-	defer r.Unlock()
-
 	sm := new(Resulter)
 	sm.result = r.result
 	sm.s = make([]string, len(r.result))
@@ -98,9 +84,6 @@ func (r *Resulter) sortedKeys() []string {
 }
 
 func (r *Resulter) WriteFile() {
-	r.Lock()
-	defer r.Unlock()
-
 	var buffer bytes.Buffer
 	for _, v := range r.sortedKeys() {
 		logrus.WithField("value", v).Debug("writing line to file")
