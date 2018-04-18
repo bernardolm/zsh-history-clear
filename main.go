@@ -12,8 +12,8 @@ import (
 	"vbom.ml/util/sortorder"
 )
 
-// TODO: With less limit, don't match repetead
-const limit int = 250000
+// TODO: don't matching repetead With limit less than total lines
+const limit int = 500
 
 var file = os.Getenv("HOME") + "/.zsh_history"
 
@@ -67,12 +67,15 @@ func (r *resulter) Swap(i, j int) {
 	r.s[i], r.s[j] = r.s[j], r.s[i]
 }
 
-func sortedKeys(m map[string]string) []string {
+func (r *resulter) sortedKeys() []string {
+	r.Lock()
+	defer r.Unlock()
+
 	sm := new(resulter)
-	sm.result = m
-	sm.s = make([]string, len(m))
+	sm.result = r.result
+	sm.s = make([]string, len(r.result))
 	i := 0
-	for key := range m {
+	for key := range r.result {
 		sm.s[i] = key
 		i++
 	}
@@ -105,12 +108,12 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 	lines = &[]string{}
 }
 
-func (r resulter) writeFile() {
+func (r *resulter) writeFile() {
 	r.Lock()
 	defer r.Unlock()
 
 	var buffer bytes.Buffer
-	for _, v := range sortedKeys(r.result) {
+	for _, v := range r.sortedKeys() {
 		logrus.WithField("value", v).Debug("writing line to file")
 		buffer.WriteString(v)
 		buffer.WriteString("\n")
