@@ -13,9 +13,8 @@ import (
 type Resulter struct {
 	sync.Mutex
 
-	counter *Counter
-	result  map[string]string
-	s       []string
+	result map[string]string
+	s      []string
 }
 
 func (r *Resulter) ProcessSlice(data []string) {
@@ -25,18 +24,17 @@ func (r *Resulter) ProcessSlice(data []string) {
 	}
 
 	// TODO: don't matching repetead With limit less than total lines
-	r.counter = NewCounter(50000000)
+	limit := 50000000
+	if limit > len(data) {
+		limit = len(data)
+	}
 
-	for _ = range data {
-		r.counter.Plus()
-
-		if r.counter.NotReached() {
-			go r.addData(data)
-		}
+	for position := 0; position <= len(data); position += limit {
+		go r.addData(data[position:limit])
 	}
 }
 
-func (r *Resulter) addData(lines []string) {
+func (r *Resulter) addData(data []string) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -44,7 +42,7 @@ func (r *Resulter) addData(lines []string) {
 		r.result = make(map[string]string)
 	}
 
-	for _, v := range lines {
+	for _, v := range data {
 		if len(v) <= 15 {
 			continue
 		}
