@@ -13,31 +13,9 @@ import (
 )
 
 // TODO: don't matching repetead With limit less than total lines
-const limit int = 500
+const limit int = 50000000
 
 var file = os.Getenv("HOME") + "/.zsh_history"
-
-type counter struct {
-	count      int
-	totalCount int
-}
-
-func (c *counter) plus() {
-	c.count++
-	c.totalCount++
-}
-
-func (c *counter) reset() {
-	c.count = 0
-}
-
-func (c *counter) position() int {
-	return c.count
-}
-
-func (c *counter) total() int {
-	return c.totalCount
-}
 
 type resulter struct {
 	sync.Mutex
@@ -83,7 +61,7 @@ func (r *resulter) sortedKeys() []string {
 	return sm.s
 }
 
-func (r *resulter) addData(lines *[]string, mycounter *counter) {
+func (r *resulter) addData(lines *[]string, mycounter *Counter) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -141,7 +119,7 @@ func do() {
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
 
-	mycounter := counter{}
+	mycounter := Counter{}
 	var lines []string
 
 	for scanner.Scan() {
