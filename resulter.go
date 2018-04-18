@@ -38,7 +38,7 @@ func (r *Resulter) AddData(lines *[]string, mycounter *Counter) {
 		}
 	}
 
-	mycounter.reset()
+	mycounter.Reset()
 	lines = &[]string{}
 }
 
