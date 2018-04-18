@@ -5,19 +5,19 @@ type Counter struct {
 	totalCount int
 }
 
-func (c *Counter) plus() {
+func (c *Counter) Plus() {
 	c.count++
 	c.totalCount++
 }
 
-func (c *Counter) reset() {
+func (c *Counter) Reset() {
 	c.count = 0
 }
 
-func (c Counter) position() int {
+func (c Counter) Position() int {
 	return c.count
 }
 
-func (c Counter) total() int {
+func (c Counter) Total() int {
 	return c.totalCount
 }

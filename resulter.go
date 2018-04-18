@@ -17,6 +17,31 @@ type Resulter struct {
 	s      []string
 }
 
+func (r *Resulter) AddData(lines *[]string, mycounter *Counter) {
+	r.Lock()
+	defer r.Unlock()
+
+	if r.result == nil {
+		r.result = make(map[string]string)
+	}
+
+	for _, v := range *lines {
+		if len(v) <= 15 {
+			continue
+		}
+		first := v[0:1]
+		value := v[15:len(v)]
+		if _, ok := r.result[value]; !ok && first == ":" {
+			r.result[value] = v
+		} else {
+			logrus.WithField("entry", v).WithField("value", value).Debug("ignoring repeated")
+		}
+	}
+
+	mycounter.reset()
+	lines = &[]string{}
+}
+
 func (r *Resulter) Len() int {
 	r.Lock()
 	defer r.Unlock()
@@ -54,32 +79,7 @@ func (r *Resulter) sortedKeys() []string {
 	return sm.s
 }
 
-func (r *Resulter) addData(lines *[]string, mycounter *Counter) {
-	r.Lock()
-	defer r.Unlock()
-
-	if r.result == nil {
-		r.result = make(map[string]string)
-	}
-
-	for _, v := range *lines {
-		if len(v) <= 15 {
-			continue
-		}
-		first := v[0:1]
-		value := v[15:len(v)]
-		if _, ok := r.result[value]; !ok && first == ":" {
-			r.result[value] = v
-		} else {
-			logrus.WithField("entry", v).WithField("value", value).Debug("ignoring repeated")
-		}
-	}
-
-	mycounter.reset()
-	lines = &[]string{}
-}
-
-func (r *Resulter) writeFile() {
+func (r *Resulter) WriteFile() {
 	r.Lock()
 	defer r.Unlock()
 

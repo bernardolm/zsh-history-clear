@@ -33,20 +33,20 @@ func do() {
 
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
-		mycounter.plus()
+		mycounter.Plus()
 
-		if mycounter.position() == limit {
-			go myresulter.addData(&lines, &mycounter)
+		if mycounter.Position() == limit {
+			go myresulter.AddData(&lines, &mycounter)
 		}
 	}
 
-	myresulter.addData(&lines, &mycounter)
+	myresulter.AddData(&lines, &mycounter)
 
 	if err := scanner.Err(); err != nil {
 		logrus.WithError(err).Fatal(err)
 	}
 
-	myresulter.writeFile()
+	myresulter.WriteFile()
 }
 
 func init() {
