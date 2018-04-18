@@ -23,6 +23,10 @@ func (c Counter) Total() int {
 	return c.totalCount
 }
 
+func (c Counter) NotReached() bool {
+	return c.count < c.limit
+}
+
 func NewCounter(args ...interface{}) *Counter {
 	if len(args) > 0 {
 		if limit, ok := args[0].(*int); ok && limit != nil && *limit > 0 {
