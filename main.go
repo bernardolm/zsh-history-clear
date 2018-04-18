@@ -3,13 +3,13 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
-	"sync"
+
+	logrus "github.com/sirupsen/logrus"
 )
 
+// TODO: With less limit, don't match repetead
 const limit int = 250
 
 var file = os.Getenv("HOME") + "/.zsh_history"
@@ -49,6 +49,7 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 	if r.result == nil {
 		r.result = make(map[string]string)
 	}
+
 	for _, v := range *lines {
 		if len(v) < 16 {
 			continue
@@ -58,7 +59,7 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 		if _, ok := r.result[value]; !ok && f == ":" {
 			r.result[value] = v
 		} else {
-			fmt.Printf("ignoring entry repeated %s\n", v)
+			logrus.WithField("entry", v).WithField("value", value).Debug("ignoring repeated")
 		}
 	}
 
@@ -69,13 +70,14 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 func (r resulter) writeFile() {
 	var buffer bytes.Buffer
 	for _, v := range r.result {
+		logrus.WithField("value", v).Debug("writing line to file")
 		buffer.WriteString(v)
 		buffer.WriteString("\n")
 	}
 
-	err := ioutil.WriteFile(file, buffer.Bytes(), 0644)
+	err := ioutil.WriteFile(file+"_new", buffer.Bytes(), 0664)
 	if err != nil {
-		log.Fatal(err)
+		logrus.WithError(err).Fatal(err)
 	}
 }
 
@@ -83,12 +85,12 @@ var myresulter resulter
 
 func do() {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
-		panic("filepath not exist")
+		logrus.WithError(err).Panic("filepath not exist")
 	}
 
 	file, err := os.Open(file)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 	defer file.Close()
 
@@ -110,10 +112,15 @@ func do() {
 	myresulter.addData(&lines, &mycounter)
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		logrus.WithError(err).Fatal(err)
 	}
 
 	myresulter.writeFile()
+}
+
+func init() {
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.DebugLevel)
 }
 
 func main() {
