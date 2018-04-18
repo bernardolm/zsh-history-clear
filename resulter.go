@@ -13,11 +13,30 @@ import (
 type Resulter struct {
 	sync.Mutex
 
-	result map[string]string
-	s      []string
+	counter *Counter
+	result  map[string]string
+	s       []string
 }
 
-func (r *Resulter) AddData(lines *[]string, mycounter *Counter) {
+func (r *Resulter) ProcessSlice(data []string) {
+	if data == nil {
+		logrus.Error("empty data")
+		return
+	}
+
+	// TODO: don't matching repetead With limit less than total lines
+	r.counter = NewCounter(50000000)
+
+	for _ = range data {
+		r.counter.Plus()
+
+		if r.counter.NotReached() {
+			go r.addData(data)
+		}
+	}
+}
+
+func (r *Resulter) addData(lines []string) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -25,7 +44,7 @@ func (r *Resulter) AddData(lines *[]string, mycounter *Counter) {
 		r.result = make(map[string]string)
 	}
 
-	for _, v := range *lines {
+	for _, v := range lines {
 		if len(v) <= 15 {
 			continue
 		}
@@ -38,8 +57,7 @@ func (r *Resulter) AddData(lines *[]string, mycounter *Counter) {
 		}
 	}
 
-	mycounter.Reset()
-	lines = &[]string{}
+	r.counter.Reset()
 }
 
 func (r *Resulter) Len() int {
