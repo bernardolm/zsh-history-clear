@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	logrus "github.com/sirupsen/logrus"
+	"vbom.ml/util/sortorder"
 )
 
 // TODO: With less limit, don't match repetead
@@ -50,7 +51,7 @@ func (r *resulter) Len() int {
 }
 
 func (r *resulter) Less(i, j int) bool {
-	return r.s[i] < r.s[j]
+	return sortorder.NaturalLess(r.s[i], r.s[j])
 }
 
 func (r *resulter) Swap(i, j int) {
