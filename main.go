@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -56,6 +57,8 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 		value := v[16:len(v)]
 		if _, ok := r.result[value]; !ok && f == ":" {
 			r.result[value] = v
+		} else {
+			fmt.Printf("ignoring entry repeated %s\n", v)
 		}
 	}
 
