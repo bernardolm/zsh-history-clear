@@ -79,12 +79,12 @@ func (r *resulter) addData(lines *[]string, mycounter *counter) {
 	}
 
 	for _, v := range *lines {
-		if len(v) < 16 {
+		if len(v) <= 15 {
 			continue
 		}
-		f := v[0:1]
-		value := v[16:len(v)]
-		if _, ok := r.result[value]; !ok && f == ":" {
+		first := v[0:1]
+		value := v[15:len(v)]
+		if _, ok := r.result[value]; !ok && first == ":" {
 			r.result[value] = v
 		} else {
 			logrus.WithField("entry", v).WithField("value", value).Debug("ignoring repeated")
