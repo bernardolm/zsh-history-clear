@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"sync"
 
 	logrus "github.com/sirupsen/logrus"
 )
