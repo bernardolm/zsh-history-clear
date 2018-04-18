@@ -7,9 +7,6 @@ import (
 	logrus "github.com/sirupsen/logrus"
 )
 
-// TODO: don't matching repetead With limit less than total lines
-const limit int = 50000000
-
 var file = os.Getenv("HOME") + "/.zsh_history"
 
 var myresulter Resulter
@@ -28,19 +25,20 @@ func do() {
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
 
-	mycounter := Counter{}
+	// TODO: don't matching repetead With limit less than total lines
+	mycounter := NewCounter(50000000)
 	var lines []string
 
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 		mycounter.Plus()
 
-		if mycounter.Position() == limit {
-			go myresulter.AddData(&lines, &mycounter)
+		if mycounter.Position() == mycounter.limit {
+			go myresulter.AddData(&lines, mycounter)
 		}
 	}
 
-	myresulter.AddData(&lines, &mycounter)
+	myresulter.AddData(&lines, mycounter)
 
 	if err := scanner.Err(); err != nil {
 		logrus.WithError(err).Fatal(err)
