@@ -1,14 +1,14 @@
 package main
 
 type Counter struct {
-	count      int
-	limit      int
-	totalCount int
+	count int
+	limit int
+	total int
 }
 
 func (c *Counter) Plus() {
 	c.count++
-	c.totalCount++
+	c.total++
 }
 
 func (c *Counter) Reset() {
@@ -20,7 +20,7 @@ func (c Counter) Position() int {
 }
 
 func (c Counter) Total() int {
-	return c.totalCount
+	return c.total
 }
 
 func (c Counter) NotReached() bool {
