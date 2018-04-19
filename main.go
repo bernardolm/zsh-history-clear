@@ -46,7 +46,7 @@ func do() {
 	}
 
 	var myresulter Resulter
-	myresulter.ProcessSlice(lines)
+	myresulter.ProcessSlice(lines, getZshHistoryKeyValue)
 	myresulter.WriteFile()
 }
 
