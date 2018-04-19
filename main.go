@@ -9,7 +9,7 @@ import (
 
 var file = os.Getenv("HOME") + "/.zsh_history"
 
-func getZshHistoryKeyValue(s string) (string, string, bool) {
+func splitZshHistoryKeyValue(s string) (string, string, bool) {
 	if len(s) <= 15 {
 		return "", "", false
 	}
@@ -46,7 +46,7 @@ func do() {
 	}
 
 	var myresulter Resulter
-	myresulter.ProcessSlice(lines, getZshHistoryKeyValue)
+	myresulter.ProcessSlice(lines, splitZshHistoryKeyValue)
 	myresulter.WriteFile()
 }
 

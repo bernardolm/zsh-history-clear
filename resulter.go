@@ -10,7 +10,7 @@ import (
 	"vbom.ml/util/sortorder"
 )
 
-type KeyValueChecker (func(string) (string, string, bool))
+type KeyValueSplitter (func(string) (string, string, bool))
 
 type Resulter struct {
 	sync.Mutex
@@ -19,7 +19,7 @@ type Resulter struct {
 	s      []string
 }
 
-func (r *Resulter) ProcessSlice(data []string, kvc KeyValueChecker) {
+func (r *Resulter) ProcessSlice(data []string, kvs KeyValueSplitter) {
 	if data == nil {
 		logrus.Error("empty data")
 		return
@@ -32,11 +32,11 @@ func (r *Resulter) ProcessSlice(data []string, kvc KeyValueChecker) {
 	}
 
 	for position := 0; position <= len(data); position += limit {
-		go r.addData(data[position:limit], kvc)
+		go r.addData(data[position:limit], kvs)
 	}
 }
 
-func (r *Resulter) addData(data []string, kvc KeyValueChecker) {
+func (r *Resulter) addData(data []string, kvs KeyValueSplitter) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -45,7 +45,7 @@ func (r *Resulter) addData(data []string, kvc KeyValueChecker) {
 	}
 
 	for _, item := range data {
-		key, value, ok := kvc(item)
+		key, value, ok := kvs(item)
 		if !ok {
 			continue
 		}
