@@ -57,7 +57,7 @@ func (r *Resulter) addData(data []string, kvs KeyValueSplitter) {
 			logrus.WithField("entry", item).
 				WithField("key", key).
 				WithField("value", value).
-				Debug("ignoring repeated")
+				Info("ignoring repeated")
 		}
 	}
 }

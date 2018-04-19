@@ -5,6 +5,7 @@ import (
 	"os"
 
 	logrus "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 var file = os.Getenv("HOME") + "/.zsh_history"
@@ -52,7 +53,11 @@ func do() {
 
 func init() {
 	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.DebugLevel)
+
+	viper.BindEnv("DEBUG")
+	if viper.GetBool("DEBUG") {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 }
 
 func main() {
