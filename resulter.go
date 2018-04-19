@@ -10,6 +10,7 @@ import (
 	"vbom.ml/util/sortorder"
 )
 
+// KeyValueSplitter func needs return key, value, ok tuple
 type KeyValueSplitter (func(string) (string, string, bool))
 
 type Resulter struct {
@@ -32,7 +33,7 @@ func (r *Resulter) ProcessSlice(data []string, kvs KeyValueSplitter) {
 	}
 
 	for position := 0; position <= len(data); position += limit {
-		go r.addData(data[position:limit], kvs)
+		r.addData(data[position:limit], kvs)
 	}
 }
 
@@ -51,7 +52,7 @@ func (r *Resulter) addData(data []string, kvs KeyValueSplitter) {
 		}
 
 		if _, ok = r.result[key]; !ok {
-			r.result[key] = value
+			r.result[key] = item
 		} else {
 			logrus.WithField("entry", item).
 				WithField("key", key).
@@ -88,9 +89,10 @@ func (r *Resulter) sortedKeys() []string {
 
 func (r *Resulter) WriteFile() {
 	var buffer bytes.Buffer
-	for _, v := range r.sortedKeys() {
-		logrus.WithField("value", v).Debug("writing line to file")
-		buffer.WriteString(v)
+	for _, k := range r.sortedKeys() {
+		logrus.WithField("value", r.result[k]).
+			Debug("writing line to file")
+		buffer.WriteString(r.result[k])
 		buffer.WriteString("\n")
 	}
 
