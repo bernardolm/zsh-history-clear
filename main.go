@@ -9,6 +9,18 @@ import (
 
 var file = os.Getenv("HOME") + "/.zsh_history"
 
+func getZshHistoryKeyValue(s string) (string, string, bool) {
+	if len(s) <= 15 {
+		return "", "", false
+	}
+
+	if s[0:1] != ":" {
+		return "", "", false
+	}
+
+	return s[0:14], s[15:len(s)], true
+}
+
 func do() {
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		logrus.WithError(err).Panic("filepath not exist")
