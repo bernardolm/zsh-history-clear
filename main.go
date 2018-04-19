@@ -18,7 +18,7 @@ func splitZshHistoryKeyValue(s string) (string, string, bool) {
 		return "", "", false
 	}
 
-	return s[0:14], s[15:len(s)], true
+	return s[15:len(s)], s, true
 }
 
 func do() {
