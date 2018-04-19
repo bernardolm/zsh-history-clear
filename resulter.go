@@ -79,8 +79,8 @@ func (r *Resulter) sortedKeys() []string {
 	sm.result = r.result
 	sm.s = make([]string, len(r.result))
 	i := 0
-	for key := range r.result {
-		sm.s[i] = key
+	for _, value := range r.result {
+		sm.s[i] = value
 		i++
 	}
 	sort.Sort(sm)
@@ -89,10 +89,13 @@ func (r *Resulter) sortedKeys() []string {
 
 func (r *Resulter) WriteFile() {
 	var buffer bytes.Buffer
-	for _, k := range r.sortedKeys() {
-		logrus.WithField("value", r.result[k]).
+
+	for k, v := range r.sortedKeys() {
+		logrus.WithField("key", k).
+			WithField("value", v).
 			Debug("writing line to file")
-		buffer.WriteString(r.result[k])
+
+		buffer.WriteString(v)
 		buffer.WriteString("\n")
 	}
 
