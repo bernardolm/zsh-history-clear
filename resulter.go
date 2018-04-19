@@ -67,7 +67,7 @@ func (r *Resulter) Len() int {
 }
 
 func (r *Resulter) Less(i, j int) bool {
-	return sortorder.NaturalLess(r.s[i], r.s[j])
+	return !sortorder.NaturalLess(r.s[i], r.s[j])
 }
 
 func (r *Resulter) Swap(i, j int) {
