@@ -10,6 +10,8 @@ import (
 	"vbom.ml/util/sortorder"
 )
 
+type KeyValueChecker (func(string) (string, string, bool))
+
 type Resulter struct {
 	sync.Mutex
 
@@ -17,7 +19,7 @@ type Resulter struct {
 	s      []string
 }
 
-func (r *Resulter) ProcessSlice(data []string) {
+func (r *Resulter) ProcessSlice(data []string, kvc KeyValueChecker) {
 	if data == nil {
 		logrus.Error("empty data")
 		return
@@ -30,11 +32,11 @@ func (r *Resulter) ProcessSlice(data []string) {
 	}
 
 	for position := 0; position <= len(data); position += limit {
-		go r.addData(data[position:limit])
+		go r.addData(data[position:limit], kvc)
 	}
 }
 
-func (r *Resulter) addData(data []string) {
+func (r *Resulter) addData(data []string, kvc KeyValueChecker) {
 	r.Lock()
 	defer r.Unlock()
 
@@ -42,16 +44,19 @@ func (r *Resulter) addData(data []string) {
 		r.result = make(map[string]string)
 	}
 
-	for _, v := range data {
-		if len(v) <= 15 {
+	for _, item := range data {
+		key, value, ok := kvc(item)
+		if !ok {
 			continue
 		}
-		first := v[0:1]
-		value := v[15:len(v)]
-		if _, ok := r.result[value]; !ok && first == ":" {
-			r.result[value] = v
+
+		if _, ok = r.result[key]; !ok {
+			r.result[key] = value
 		} else {
-			logrus.WithField("entry", v).WithField("value", value).Debug("ignoring repeated")
+			logrus.WithField("entry", item).
+				WithField("key", key).
+				WithField("value", value).
+				Debug("ignoring repeated")
 		}
 	}
 }
