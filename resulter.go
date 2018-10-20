@@ -104,3 +104,7 @@ func (r *Resulter) WriteFile() {
 		logrus.WithError(err).Fatal(err)
 	}
 }
+
+func (r Resulter) Result() map[string]string {
+	return r.result
+}
