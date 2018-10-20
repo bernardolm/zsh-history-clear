@@ -11,12 +11,8 @@ import (
 var file = os.Getenv("HOME") + "/.zsh_history"
 
 func splitZshHistoryKeyValue(s string) (string, string, bool) {
-	if len(s) <= 15 {
-		return "", "", false
-	}
-
-	if s[0:1] != ":" {
-		return "", "", false
+	if len(s) <= 15 || s[0:1] != ":" {
+		return "", s, false
 	}
 
 	return s[15:len(s)], s, true

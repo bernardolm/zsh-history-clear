@@ -1,6 +1,34 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestSplitZshHistoryKeyValue(t *testing.T) {
+	input := ": 1539986823:0;ls -lah"
+	expected := "ls -lah"
+
+	actual1, actual2, actualBool := splitZshHistoryKeyValue(input)
+	assert.Equal(t, expected, actual1)
+	assert.Equal(t, input, actual2)
+	assert.True(t, actualBool)
+
+	input = "x 1539986823:0;ls -lah"
+
+	actual1, actual2, actualBool = splitZshHistoryKeyValue(input)
+	assert.Equal(t, "", actual1)
+	assert.Equal(t, input, actual2)
+	assert.False(t, actualBool)
+
+	input = ": 1539986823:0"
+
+	actual1, actual2, actualBool = splitZshHistoryKeyValue(input)
+	assert.Equal(t, "", actual1)
+	assert.Equal(t, input, actual2)
+	assert.False(t, actualBool)
+}
 
 func benchmarkDo(i int, b *testing.B) {
 	for n := 0; n < 100; n++ {
