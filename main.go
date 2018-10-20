@@ -54,7 +54,6 @@ func do() {
 func init() {
 	logrus.SetOutput(os.Stdout)
 
-	viper.BindEnv("DEBUG")
 	if viper.GetBool("DEBUG") {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
