@@ -2,13 +2,14 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"os"
 
 	logrus "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-var file = os.Getenv("HOME") + "/.zsh_history"
+var filePath string
 
 func splitZshHistoryKeyValue(s string) (string, string, bool) {
 	if len(s) <= 15 || s[0:1] != ":" {
@@ -19,11 +20,11 @@ func splitZshHistoryKeyValue(s string) (string, string, bool) {
 }
 
 func do() {
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		logrus.WithError(err).Panic("filepath not exist")
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		logrus.WithError(err).Panicf("filepath %s not exist", filePath)
 	}
 
-	file, err := os.Open(file)
+	file, err := os.Open(filePath)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -56,5 +57,8 @@ func init() {
 }
 
 func main() {
+	file := flag.String("file", os.Getenv("HOME")+"/.zsh_history", "file path")
+	filePath = *file
+
 	do()
 }

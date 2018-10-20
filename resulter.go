@@ -99,7 +99,7 @@ func (r *Resulter) WriteFile() {
 		buffer.WriteString("\n")
 	}
 
-	err := ioutil.WriteFile(file, buffer.Bytes(), 0664)
+	err := ioutil.WriteFile(filePath, buffer.Bytes(), 0664)
 	if err != nil {
 		logrus.WithError(err).Fatal(err)
 	}

@@ -1,4 +1,3 @@
-
 run:
 	reset && go run main.go counter.go resulter.go
 
@@ -7,3 +6,6 @@ run-debug:
 
 test:
 	go test ./...
+
+bench:
+	go test ./... -benchmem -bench ^Bench
