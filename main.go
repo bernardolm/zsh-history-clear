@@ -58,6 +58,7 @@ func init() {
 
 func main() {
 	file := flag.String("file", os.Getenv("HOME")+"/.zsh_history", "file path")
+	flag.Parse()
 	filePath = *file
 
 	do()
