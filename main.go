@@ -19,7 +19,6 @@ var outputFilePath string
 
 func initLogger() {
 	logrus.SetOutput(os.Stdout)
-
 	if viper.GetBool("DEBUG") {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
@@ -46,9 +45,11 @@ func parseLines(f *os.File) []string {
 	defer f.Close()
 	sc := bufio.NewScanner(f)
 	sc.Split(bufio.ScanLines)
-	var l []string
+	l := []string{}
 	for sc.Scan() {
-		l = append(l, sc.Text())
+		if len(sc.Text()) > 0 {
+			l = append(l, sc.Text())
+		}
 	}
 	if err := sc.Err(); err != nil {
 		logrus.WithError(err).Panic(err)
@@ -56,30 +57,35 @@ func parseLines(f *os.File) []string {
 	return l
 }
 
-func splitLines(l []string) map[string]string {
-	m := map[string]string{}
+func uniqueLines(l []string) []string {
+	m := make(map[string]int, len(l))
 	rs := `^(:\s\d+:\d+;)(.*)$`
 	re := regexp.MustCompile(rs)
 	if re == nil {
 		logrus.Panicf("regex %s not compile", rs)
 	}
-	sort.Strings(l)
+	sort.Sort(sort.Reverse(sort.StringSlice(l)))
+	lo := make([]string, 0, len(l))
 	for k := range l {
 		g := re.FindAllStringSubmatch(l[k], -1)
 		if len(g) == 0 {
 			logrus.WithField("line", l[k]).Panic("line can't match regex")
 		}
 		cmd := strings.TrimSpace(g[0][2])
-		m[cmd] = fmt.Sprintf("%s%s", g[0][1], cmd)
+		if _, ok := m[cmd]; !ok {
+			lo = append(lo, fmt.Sprintf("%s%s", g[0][1], cmd))
+			m[cmd] = 1
+		}
 	}
-	logrus.Infof("turn %d lines into %d", len(l), len(m))
-	return m
+	logrus.Infof("turn %d lines into %d", len(l), len(lo))
+	sort.Strings(lo)
+	return lo
 }
 
-func writeFile(m map[string]string) {
+func writeFile(l []string) {
 	var b bytes.Buffer
-	for k := range m {
-		b.WriteString(m[k])
+	for k := range l {
+		b.WriteString(l[k])
 		b.WriteString("\n")
 	}
 	if err := ioutil.WriteFile(outputFilePath, b.Bytes(), 0664); err != nil {
@@ -89,5 +95,8 @@ func writeFile(m map[string]string) {
 
 func main() {
 	initLogger()
-	writeFile(splitLines(parseLines(readFile())))
+	writeFile(
+		uniqueLines(
+			parseLines(
+				readFile())))
 }
