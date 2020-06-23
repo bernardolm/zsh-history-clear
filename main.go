@@ -2,53 +2,20 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
+	"io/ioutil"
 	"os"
+	"regexp"
+	"sort"
 
 	logrus "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-var filePath string
+var outputFilePath string
 
-func splitZshHistoryKeyValue(s string) (string, string, bool) {
-	if len(s) <= 15 || s[0:1] != ":" {
-		return "", s, false
-	}
-
-	return s[15:len(s)], s, true
-}
-
-func do() {
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		logrus.WithError(err).Panicf("filepath %s not exist", filePath)
-	}
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
-
-	var lines []string
-
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	if err := scanner.Err(); err != nil {
-		logrus.WithError(err).Fatal(err)
-	}
-
-	var myresulter Resulter
-	myresulter.ProcessSlice(lines, splitZshHistoryKeyValue)
-	myresulter.WriteFile()
-}
-
-func init() {
+func initLogger() {
 	logrus.SetOutput(os.Stdout)
 
 	if viper.GetBool("DEBUG") {
@@ -56,10 +23,68 @@ func init() {
 	}
 }
 
-func main() {
-	file := flag.String("file", os.Getenv("HOME")+"/.zsh_history", "file path")
+func readFile() *os.File {
+	fp := flag.String("file", "./zsh_history", "file path")
 	flag.Parse()
-	filePath = *file
+	if fp == nil {
+		logrus.Panic("filepath not exist")
+	}
+	if _, err := os.Stat(*fp); os.IsNotExist(err) {
+		logrus.WithError(err).Panicf("filepath %s not exist", *fp)
+	}
+	outputFilePath = *fp
+	f, err := os.Open(*fp)
+	if err != nil {
+		logrus.WithError(err).Panic(err)
+	}
+	return f
+}
 
-	do()
+func parseLines(f *os.File) []string {
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	sc.Split(bufio.ScanLines)
+	var l []string
+	for sc.Scan() {
+		l = append(l, sc.Text())
+	}
+	if err := sc.Err(); err != nil {
+		logrus.WithError(err).Panic(err)
+	}
+	return l
+}
+
+func splitLines(l []string) map[string]string {
+	m := map[string]string{}
+	rs := `^(:\s\d+:\d+;)(.*)$`
+	re := regexp.MustCompile(rs)
+	if re == nil {
+		logrus.Panicf("regex %s not compile", rs)
+	}
+	sort.Strings(l)
+	for k := range l {
+		g := re.FindAllStringSubmatch(l[k], -1)
+		if len(g) == 0 {
+			logrus.WithField("line", l[k]).Panic("line can't match regex")
+		}
+		m[g[0][2]] = g[0][0]
+	}
+	logrus.Infof("turn %d lines into %d", len(l), len(m))
+	return m
+}
+
+func writeFile(m map[string]string) {
+	var b bytes.Buffer
+	for k := range m {
+		b.WriteString(m[k])
+		b.WriteString("\n")
+	}
+	if err := ioutil.WriteFile(outputFilePath, b.Bytes(), 0664); err != nil {
+		logrus.WithError(err).Panic(err)
+	}
+}
+
+func main() {
+	initLogger()
+	writeFile(splitLines(parseLines(readFile())))
 }
