@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/cheggaaa/pb/v3"
 	logrus "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -66,6 +67,8 @@ func uniqueLines(l []string) []string {
 	}
 	sort.Sort(sort.Reverse(sort.StringSlice(l)))
 	lo := make([]string, 0, len(l))
+	fmt.Println("processing...")
+	bar := pb.StartNew(len(l))
 	for k := range l {
 		g := re.FindAllStringSubmatch(l[k], -1)
 		if len(g) == 0 {
@@ -76,7 +79,9 @@ func uniqueLines(l []string) []string {
 			lo = append(lo, fmt.Sprintf("%s%s", g[0][1], cmd))
 			m[cmd] = 1
 		}
+		bar.Increment()
 	}
+	bar.Finish()
 	logrus.Infof("turn %d lines into %d", len(l), len(lo))
 	sort.Strings(lo)
 	return lo
@@ -84,10 +89,14 @@ func uniqueLines(l []string) []string {
 
 func writeFile(l []string) {
 	var b bytes.Buffer
+	fmt.Println("writing...")
+	bar := pb.StartNew(len(l))
 	for k := range l {
 		b.WriteString(l[k])
 		b.WriteString("\n")
+		bar.Increment()
 	}
+	bar.Finish()
 	if err := ioutil.WriteFile(outputFilePath, b.Bytes(), 0664); err != nil {
 		logrus.WithError(err).Panic(err)
 	}
