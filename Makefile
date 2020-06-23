@@ -1,8 +1,8 @@
 run:
-	reset && go run main.go counter.go resulter.go
+	go run main.go --file ./zsh_history
 
 run-debug:
-	reset && DEBUG=true go run main.go counter.go resulter.go
+	DEBUG=true $(MAKE) run
 
 test:
 	go test ./...
