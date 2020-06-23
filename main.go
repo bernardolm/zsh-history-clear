@@ -11,12 +11,32 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/cheggaaa/pb/v3"
+	"github.com/k0kubun/go-ansi"
+	"github.com/schollz/progressbar/v3"
 	logrus "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 var outputFilePath string
+var linesRead int
+
+func newProgressBar(size int, title string) *progressbar.ProgressBar {
+	return progressbar.NewOptions(size,
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionFullWidth(),
+		progressbar.OptionSetDescription("[cyan]"+title+"[reset]"),
+		progressbar.OptionSetPredictTime(false),
+		progressbar.OptionSetRenderBlankState(true),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			BarEnd:        "]",
+			BarStart:      "[",
+			Saucer:        "[green]▉[reset]",
+			SaucerHead:    "[green]▁[reset]",
+			SaucerPadding: "░",
+		}),
+		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
+	)
+}
 
 func initLogger() {
 	logrus.SetOutput(os.Stdout)
@@ -55,6 +75,7 @@ func parseLines(f *os.File) []string {
 	if err := sc.Err(); err != nil {
 		logrus.WithError(err).Panic(err)
 	}
+	linesRead = len(l)
 	return l
 }
 
@@ -67,8 +88,7 @@ func uniqueLines(l []string) []string {
 	}
 	sort.Sort(sort.Reverse(sort.StringSlice(l)))
 	lo := make([]string, 0, len(l))
-	fmt.Println("processing...")
-	bar := pb.StartNew(len(l))
+	bar1 := newProgressBar(len(l), "processing...  ")
 	for k := range l {
 		g := re.FindAllStringSubmatch(l[k], -1)
 		if len(g) == 0 {
@@ -79,27 +99,26 @@ func uniqueLines(l []string) []string {
 			lo = append(lo, fmt.Sprintf("%s%s", g[0][1], cmd))
 			m[cmd] = 1
 		}
-		bar.Increment()
+		_ = bar1.Add(1)
 	}
-	bar.Finish()
-	logrus.Infof("turn %d lines into %d", len(l), len(lo))
+	fmt.Println()
 	sort.Strings(lo)
 	return lo
 }
 
 func writeFile(l []string) {
 	var b bytes.Buffer
-	fmt.Println("writing...")
-	bar := pb.StartNew(len(l))
+	bar2 := newProgressBar(len(l), "writing file...")
 	for k := range l {
 		b.WriteString(l[k])
 		b.WriteString("\n")
-		bar.Increment()
+		_ = bar2.Add(1)
 	}
-	bar.Finish()
+	fmt.Println()
 	if err := ioutil.WriteFile(outputFilePath, b.Bytes(), 0664); err != nil {
 		logrus.WithError(err).Panic(err)
 	}
+	fmt.Printf("turn %d lines into %d\n", linesRead, len(l))
 }
 
 func main() {
