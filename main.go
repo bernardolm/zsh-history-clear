@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"sort"
+	"strings"
 
 	logrus "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -67,7 +69,8 @@ func splitLines(l []string) map[string]string {
 		if len(g) == 0 {
 			logrus.WithField("line", l[k]).Panic("line can't match regex")
 		}
-		m[g[0][2]] = g[0][0]
+		cmd := strings.TrimSpace(g[0][2])
+		m[cmd] = fmt.Sprintf("%s%s", g[0][1], cmd)
 	}
 	logrus.Infof("turn %d lines into %d", len(l), len(m))
 	return m
