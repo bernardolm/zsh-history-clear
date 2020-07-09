@@ -110,6 +110,34 @@ func uniqueLines(l []string) []string {
 	return lo
 }
 
+func uniqueLines2(l []string) []string {
+	m := make(map[string]int, len(l))
+	sort.Sort(sort.Reverse(sort.StringSlice(l)))
+	lo := make([]string, 0, len(l))
+	bar1 := newProgressBar(len(l), "processing...  ")
+	for k := range l {
+		if len(l[k]) <= 15 {
+			logrus.WithField("line", l[k]).
+				WithField("index", l[k][:15]).
+				Error("line without command")
+			continue
+		}
+		logrus.WithField("line", l[k]).
+			WithField("index", l[k][:15]).
+			WithField("command", strings.TrimSpace(l[k][15:len(l[k])])).
+			Debug("each line")
+		cmd := strings.TrimSpace(l[k][15:len(l[k])])
+		if _, ok := m[cmd]; !ok {
+			lo = append(lo, fmt.Sprintf("%s%s", l[k][:15], cmd))
+			m[cmd] = 1
+		}
+		_ = bar1.Add(1)
+	}
+	fmt.Println()
+	sort.Strings(lo)
+	return lo
+}
+
 func writeFile(l []string) {
 	var b bytes.Buffer
 	bar2 := newProgressBar(len(l), "writing file...")
@@ -128,7 +156,7 @@ func writeFile(l []string) {
 func main() {
 	initLogger()
 	writeFile(
-		uniqueLines(
+		uniqueLines2(
 			parseLines(
 				readFile())))
 }
