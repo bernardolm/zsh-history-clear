@@ -47,9 +47,13 @@ func initLogger() {
 
 func readFile() *os.File {
 	fp := flag.String("file", "./zsh_history", "file path")
+	df := flag.Bool("debug", false, "debug mode")
 	flag.Parse()
 	if fp == nil {
 		logrus.Panic("filepath not exist")
+	}
+	if *df {
+		logrus.SetLevel(logrus.DebugLevel)
 	}
 	if _, err := os.Stat(*fp); os.IsNotExist(err) {
 		logrus.WithError(err).Panicf("filepath %s not exist", *fp)
