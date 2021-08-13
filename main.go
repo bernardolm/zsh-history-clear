@@ -13,7 +13,7 @@ import (
 
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
-	logrus "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -39,9 +39,9 @@ func newProgressBar(size int, title string) *progressbar.ProgressBar {
 }
 
 func initLogger() {
-	logrus.SetOutput(os.Stdout)
+	log.SetOutput(os.Stdout)
 	if viper.GetBool("DEBUG") {
-		logrus.SetLevel(logrus.DebugLevel)
+		log.SetLevel(log.DebugLevel)
 	}
 }
 
@@ -50,18 +50,18 @@ func readFile() *os.File {
 	df := flag.Bool("debug", false, "debug mode")
 	flag.Parse()
 	if fp == nil {
-		logrus.Panic("filepath not exist")
+		log.Panic("filepath not exist")
 	}
 	if *df {
-		logrus.SetLevel(logrus.DebugLevel)
+		log.SetLevel(log.DebugLevel)
 	}
 	if _, err := os.Stat(*fp); os.IsNotExist(err) {
-		logrus.WithError(err).Panicf("filepath %s not exist", *fp)
+		log.WithError(err).Panicf("filepath %s not exist", *fp)
 	}
 	outputFilePath = *fp
 	f, err := os.Open(*fp)
 	if err != nil {
-		logrus.WithError(err).Panic(err)
+		log.WithError(err).Panic(err)
 	}
 	return f
 }
@@ -72,12 +72,12 @@ func parseLines(f *os.File) []string {
 	sc.Split(bufio.ScanLines)
 	l := []string{}
 	for sc.Scan() {
-		if len(sc.Text()) > 0 {
+		if len(sc.Text()) > 0 && sc.Text()[:1] == ":" {
 			l = append(l, sc.Text())
 		}
 	}
 	if err := sc.Err(); err != nil {
-		logrus.WithError(err).Panic(err)
+		log.WithError(err).Panic(err)
 	}
 	linesRead = len(l)
 	return l
@@ -88,7 +88,7 @@ func uniqueLines(l []string) []string {
 	rs := `^(:\s\d+:\d+;)(.*)$`
 	re := regexp.MustCompile(rs)
 	if re == nil {
-		logrus.Panicf("regex %s not compile", rs)
+		log.Panicf("regex %s not compile", rs)
 	}
 	sort.Sort(sort.Reverse(sort.StringSlice(l)))
 	lo := make([]string, 0, len(l))
@@ -96,7 +96,7 @@ func uniqueLines(l []string) []string {
 	for k := range l {
 		g := re.FindAllStringSubmatch(l[k], -1)
 		if len(g) == 0 {
-			logrus.WithField("line", l[k]).Panic("line can't match regex")
+			log.WithField("line", l[k]).Panic("line can't match regex")
 		}
 		cmd := strings.TrimSpace(g[0][2])
 		if _, ok := m[cmd]; !ok {
@@ -117,12 +117,12 @@ func uniqueLines2(l []string) []string {
 	bar1 := newProgressBar(len(l), "processing...  ")
 	for k := range l {
 		if len(l[k]) <= 15 {
-			logrus.WithField("line", l[k]).
+			log.WithField("line", l[k]).
 				WithField("index", l[k][:15]).
 				Error("line without command")
 			continue
 		}
-		logrus.WithField("line", l[k]).
+		log.WithField("line", l[k]).
 			WithField("index", l[k][:15]).
 			WithField("command", strings.TrimSpace(l[k][15:len(l[k])])).
 			Debug("each line")
@@ -148,7 +148,7 @@ func writeFile(l []string) {
 	}
 	fmt.Println()
 	if err := ioutil.WriteFile(outputFilePath, b.Bytes(), 0664); err != nil {
-		logrus.WithError(err).Panic(err)
+		log.WithError(err).Panic(err)
 	}
 	fmt.Printf("turn %d lines into %d\n", linesRead, len(l))
 }

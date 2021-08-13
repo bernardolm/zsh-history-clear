@@ -9,3 +9,7 @@ test:
 
 bench:
 	go test ./... -benchmem -bench ^Bench
+
+build:
+	go build
+	mv zsh-history-clear ${SYNC_PATH}/bin
