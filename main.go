@@ -56,7 +56,7 @@ func readFile() *os.File {
 		log.SetLevel(log.DebugLevel)
 	}
 	if _, err := os.Stat(*fp); os.IsNotExist(err) {
-		log.WithError(err).Panicf("filepath %s not exist", *fp)
+		log.WithError(err).Fatalf("filepath %s not exist", *fp)
 	}
 	outputFilePath = *fp
 	f, err := os.Open(*fp)
@@ -69,6 +69,8 @@ func readFile() *os.File {
 func parseLines(f *os.File) []string {
 	defer f.Close()
 	sc := bufio.NewScanner(f)
+	buf := make([]byte, 0, 1024*1024)
+	sc.Buffer(buf, 1024*1024)
 	sc.Split(bufio.ScanLines)
 	l := []string{}
 	for sc.Scan() {

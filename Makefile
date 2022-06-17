@@ -11,5 +11,7 @@ bench:
 	go test ./... -benchmem -bench ^Bench
 
 build:
-	go build
+	go build -ldflags "-w -s"
+
+install: build
 	mv zsh-history-clear ${SYNC_PATH}/bin
