@@ -46,7 +46,7 @@ func initLogger() {
 }
 
 func readFile() *os.File {
-	fp := flag.String("file", "./zsh_history", "file path")
+	fp := flag.String("file", "~/.zsh_history", "file path")
 	df := flag.Bool("debug", false, "debug mode")
 	flag.Parse()
 	if fp == nil {
