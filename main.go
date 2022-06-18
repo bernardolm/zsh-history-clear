@@ -118,6 +118,7 @@ func uniqueLines2(l []string) []string {
 	lo := make([]string, 0, len(l))
 	bar1 := newProgressBar(len(l), "processing...  ")
 	for k := range l {
+		log.WithField("line", l[k]).Debug("checking line")
 		if len(l[k]) <= 15 {
 			log.WithField("line", l[k]).
 				WithField("index", l[k][:15]).
