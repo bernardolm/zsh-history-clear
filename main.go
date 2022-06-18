@@ -121,7 +121,6 @@ func uniqueLines2(l []string) []string {
 		log.WithField("line", l[k]).Debug("checking line")
 		if len(l[k]) <= 15 {
 			log.WithField("line", l[k]).
-				WithField("index", l[k][:15]).
 				Error("line without command")
 			continue
 		}
