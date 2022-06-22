@@ -50,7 +50,7 @@ func readFile() *os.File {
 	df := flag.Bool("debug", false, "debug mode")
 	flag.Parse()
 	if fp == nil {
-		log.Panic("filepath not exist")
+		log.Fatal("filepath not exist")
 	}
 	if *df {
 		log.SetLevel(log.DebugLevel)
@@ -61,7 +61,7 @@ func readFile() *os.File {
 	outputFilePath = *fp
 	f, err := os.Open(*fp)
 	if err != nil {
-		log.WithError(err).Panic(err)
+		log.WithError(err).Fatal()
 	}
 	return f
 }
@@ -79,7 +79,7 @@ func parseLines(f *os.File) []string {
 		}
 	}
 	if err := sc.Err(); err != nil {
-		log.WithError(err).Panic(err)
+		log.WithError(err).Fatal()
 	}
 	linesRead = len(l)
 	return l
@@ -90,7 +90,7 @@ func uniqueLines(l []string) []string {
 	rs := `^(:\s\d+:\d+;)(.*)$`
 	re := regexp.MustCompile(rs)
 	if re == nil {
-		log.Panicf("regex %s not compile", rs)
+		log.Fatalf("regex %s not compile", rs)
 	}
 	sort.Sort(sort.Reverse(sort.StringSlice(l)))
 	lo := make([]string, 0, len(l))
@@ -98,7 +98,7 @@ func uniqueLines(l []string) []string {
 	for k := range l {
 		g := re.FindAllStringSubmatch(l[k], -1)
 		if len(g) == 0 {
-			log.WithField("line", l[k]).Panic("line can't match regex")
+			log.WithField("line", l[k]).Fatal("line can't match regex")
 		}
 		cmd := strings.TrimSpace(g[0][2])
 		if _, ok := m[cmd]; !ok {
@@ -150,7 +150,7 @@ func writeFile(l []string) {
 	}
 	fmt.Println()
 	if err := ioutil.WriteFile(outputFilePath, b.Bytes(), 0664); err != nil {
-		log.WithError(err).Panic(err)
+		log.WithError(err).Fatal()
 	}
 	fmt.Printf("turn %d lines into %d\n", linesRead, len(l))
 }
