@@ -5,13 +5,16 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
+	"runtime/debug"
 	"sort"
 	"strings"
 
 	"github.com/k0kubun/go-ansi"
+	"github.com/k0kubun/pp"
 	"github.com/schollz/progressbar/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -50,7 +53,7 @@ func readFile() *os.File {
 	df := flag.Bool("debug", false, "debug mode")
 	flag.Parse()
 	if fp == nil {
-		log.Fatal("filepath not exist")
+		log.WithField("stack", string(debug.Stack())).Fatal("filepath not exist")
 	}
 	if *df {
 		log.SetLevel(log.DebugLevel)
@@ -61,28 +64,47 @@ func readFile() *os.File {
 	outputFilePath = *fp
 	f, err := os.Open(*fp)
 	if err != nil {
-		log.WithError(err).Fatal()
+		log.WithError(err).WithField("stack", string(debug.Stack())).Fatal()
 	}
 	return f
 }
 
 func parseLines(f *os.File) []string {
 	defer f.Close()
-	sc := bufio.NewScanner(f)
-	buf := make([]byte, 0, 1024*1024)
-	sc.Buffer(buf, 1024*1024)
-	sc.Split(bufio.ScanLines)
-	l := []string{}
-	for sc.Scan() {
-		if len(sc.Text()) > 0 && sc.Text()[:1] == ":" {
-			l = append(l, sc.Text())
-		}
+
+	defer f.Close()
+	r := bufio.NewReaderSize(f, 4*1024)
+	line, isPrefix, err := r.ReadLine()
+	for err == nil && !isPrefix {
+		s := string(line)
+		fmt.Println(s)
+		line, isPrefix, err = r.ReadLine()
 	}
-	if err := sc.Err(); err != nil {
-		log.WithError(err).Fatal()
+	if isPrefix {
+		fmt.Println("buffer size to small")
+		return nil
 	}
-	linesRead = len(l)
-	return l
+	if err != io.EOF {
+		fmt.Println(err)
+		return nil
+	}
+
+	fmt.Printf("\n\033[0;32m************************** line **************************\033[0m\n")
+	pp.Println(string(line))
+	fmt.Printf("\n\n")
+	// remember import github.com/k0kubun/pp
+
+	fmt.Printf("\n\033[0;32m************************** isPrefix **************************\033[0m\n")
+	pp.Println(isPrefix)
+	fmt.Printf("\n\n")
+	// remember import github.com/k0kubun/pp
+
+	fmt.Printf("\n\033[0;32m************************** err **************************\033[0m\n")
+	pp.Println(err)
+	fmt.Printf("\n\n")
+	// remember import github.com/k0kubun/pp
+
+	return nil
 }
 
 func uniqueLines(l []string) []string {
@@ -98,7 +120,7 @@ func uniqueLines(l []string) []string {
 	for k := range l {
 		g := re.FindAllStringSubmatch(l[k], -1)
 		if len(g) == 0 {
-			log.WithField("line", l[k]).Fatal("line can't match regex")
+			log.WithField("line", l[k]).WithField("stack", string(debug.Stack())).Fatal("line can't match regex")
 		}
 		cmd := strings.TrimSpace(g[0][2])
 		if _, ok := m[cmd]; !ok {
@@ -150,7 +172,7 @@ func writeFile(l []string) {
 	}
 	fmt.Println()
 	if err := ioutil.WriteFile(outputFilePath, b.Bytes(), 0664); err != nil {
-		log.WithError(err).Fatal()
+		log.WithError(err).WithField("stack", string(debug.Stack())).Fatal()
 	}
 	fmt.Printf("turn %d lines into %d\n", linesRead, len(l))
 }

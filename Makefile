@@ -15,3 +15,6 @@ build:
 
 install: build
 	mv zsh-history-clear ${SYNC_PATH}/bin
+
+run-v2:
+	find . -name '.zsh_history.sample' | go run cmd/v2/main.go

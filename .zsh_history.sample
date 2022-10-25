@@ -1,0 +1,96 @@
+: 1666544930:0;exit
+: 1666545431:0;cd $HOME
+: 1666545431:0;black
+: 1666545434:0;cd Downloads
+: 1666545435:0;black
+: 1666545436:0;git status
+: 1666545442:0;code .
+: 1666545893:0;black
+: 1666545907:0;cd ~
+: 1666545907:0;black
+: 1666545923:0;env | grep ZSH
+: 1666545935:0;env | grep HIS
+: 1666545942:0;cd -
+: 1666548156:0;sudo apt-get install -y chrome
+: 1666548166:0;sudo apt-get install -y docker
+: 1666548186:0;reset
+: 1666548549:0;apt search gnome
+: 1666548572:0;apt search gnome
+: 1666548884:0;sudo apt purge '^blue'
+: 1666548891:0;sudo apt purge '^blue'
+: 1666549072:0;sudo apt install gnome-screenshot
+: 1666549242:0;black
+: 1666549263:0;sudo apt install brown pink cyan
+: 1666549412:0;black
+: 1666549414:0;cd red/
+: 1666549414:0;black
+: 1666549424:0;cd green/
+: 1666549424:0;black
+: 1666549426:0;cd ..
+: 1666549427:0;black
+: 1666549429:0;cd blue/
+: 1666549429:0;black
+: 1666549432:0;cd yellow/
+: 1666549433:0;ll
+: 1666549436:0;cd ..
+: 1666549436:0;black
+: 1666549555:0;black
+: 1666549561:0;rm blue
+: 1666549570:0;black
+: 1666549571:0;cd ..
+: 1666549572:0;sudo apt install blue-yellow
+: 1666549579:0;sudo apt install blue-yellow
+: 1666549581:0;black
+: 1666549583:0;black
+: 1666549584:0;cd red/
+: 1666549585:0;black
+: 1666549586:0;cd blue/
+: 1666549587:0;black
+: 1666549588:0;cd ..
+: 1666549588:0;black
+: 1666549592:0;cd blue/
+: 1666549594:0;pwd
+: 1666549609:0;sudo apt install blue-yellow
+: 1666549617:0;cd blue/
+: 1666549617:0;black
+: 1666549641:0;black
+: 1666549649:0;black
+: 1666549650:0;cd red/
+: 1666549652:0;cd
+: 1666549654:0;cd -
+: 1666549654:0;black
+: 1666549655:0;cd blue/
+: 1666549656:0;black
+: 1666549657:0;cd yellow
+: 1666549664:0;cd yellow
+: 1666549664:0;sudo apt install blue-yellow
+: 1666549705:0;cd /
+: 1666549706:0;black
+: 1666549710:0;cd var/
+: 1666549710:0;black
+: 1666549721:0;cd lib/
+: 1666549721:0;black
+: 1666549731:0;cd /etc
+: 1666549731:0;black
+: 1666549850:0;black
+: 1666549853:0;cd /usr/
+: 1666549854:0;black
+: 1666549855:0;cd red/
+: 1666549856:0;black
+: 1666549860:0;cd blue/
+: 1666549861:0;black
+: 1666549877:0;cd yellow/
+: 1666549877:0;black
+: 1666550085:0;sudo apt install blue-yellow
+: 1666550687:0;black
+: 1666544930:0;exit
+: 1666545431:0;cd $HOME
+: 1666545431:0;black
+: 1666545434:0;cd Downloads
+: 1666545435:0;black
+: 1666545436:0;git status
+: 1666545442:0;code .
+: 1666545633:0;go run cmd/v2/main.go
+: 1666545893:0;black
+: 1666545907:0;cd ~
+: 1666545907:0;black
