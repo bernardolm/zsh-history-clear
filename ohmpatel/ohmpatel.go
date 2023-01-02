@@ -61,7 +61,7 @@ func (e *ex) process(f *os.File) error {
 
 	r := bufio.NewReader(f)
 
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
 	for {
 		buf := linesPool.Get().([]byte)
@@ -86,19 +86,21 @@ func (e *ex) process(f *os.File) error {
 			buf = append(buf, nextUntillNewline...)
 		}
 
-		wg.Add(1)
+		// wg.Add(1)
+		e.wg.Add(1)
 		go func() {
 			e.processChunk(buf, &linesPool, &stringPool)
-			wg.Done()
+			// wg.Done()
+			e.wg.Done()
 		}()
 	}
 
-	wg.Wait()
+	// wg.Wait()
 	return nil
 }
 
 func (e *ex) processChunk(chunk []byte, linesPool *sync.Pool, stringPool *sync.Pool) {
-	var wg2 sync.WaitGroup
+	// var wg2 sync.WaitGroup
 
 	logs := stringPool.Get().(string)
 	logs = string(chunk)
@@ -118,10 +120,12 @@ func (e *ex) processChunk(chunk []byte, linesPool *sync.Pool, stringPool *sync.P
 	}
 
 	for i := 0; i < (noOfThread); i++ {
-		wg2.Add(1)
+		// wg2.Add(1)
+		e.wg.Add(1)
 
-		go func(start int, end int) {
-			defer wg2.Done() //to avaoid deadlocks
+		func(start int, end int) {
+			// defer wg2.Done() //to avaoid deadlocks
+			defer e.wg.Done()
 
 			for i := start; i < end; i++ {
 				text := logsSlice[i]
@@ -129,12 +133,12 @@ func (e *ex) processChunk(chunk []byte, linesPool *sync.Pool, stringPool *sync.P
 					continue
 				}
 
-				e.next.Put([]byte(text))
+				go e.next.Put([]byte(text))
 			}
 
 		}(i*chunkSize, int(math.Min(float64((i+1)*chunkSize), float64(len(logsSlice)))))
 	}
 
-	wg2.Wait()
+	// wg2.Wait()
 	logsSlice = nil
 }

@@ -1,0 +1,32 @@
+input:
+    file:
+        paths:
+            - ${SYNC_PATH}/.zsh_history
+            #- ../../.zsh_history.sample
+        codec: lines
+        max_buffer: 2147483648
+        delete_on_finish: true
+
+pipeline:
+    processors:
+        - dedupe:
+              cache: ${CACHE_CONTAINER}
+              key: ${! content().slice(15).slug().hash("sha1").encode("hex") }
+
+output:
+    file:
+        path: "./result.txt"
+        codec: lines
+
+metrics:
+    logger:
+        flush_metrics: true
+
+cache_resources:
+    - label: ${CACHE_CONTAINER}
+      redis:
+          url: redis://${CACHE_CONTAINER}.hud:6379
+
+logger:
+    level: INFO
+    add_timestamp: true
